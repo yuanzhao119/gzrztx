@@ -1,0 +1,673 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>政府工作提醒系统</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #1a3953 0%, #0c1e33 100%);
+            color: #333;
+            min-height: 100vh;
+            padding: 40px 20px;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        body::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url('data:image/svg+xml;utf8,<svg width="100" height="100" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect width="100" height="100" fill="transparent"/><path d="M0 0L100 100M100 0L0 100" stroke="rgba(255,255,255,0.05)" stroke-width="1" /></svg>');
+            opacity: 0.6;
+            z-index: -1;
+        }
+        
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            position: relative;
+        }
+        
+        header {
+            text-align: center;
+            padding: 30px 0;
+            margin-bottom: 30px;
+            position: relative;
+        }
+        
+        header::after {
+            content: "";
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 120px;
+            height: 4px;
+            background: linear-gradient(90deg, #0081ca, #00b3fa);
+            border-radius: 2px;
+        }
+        
+        header h1 {
+            color: #fff;
+            font-size: 2.8rem;
+            margin-bottom: 10px;
+            font-weight: 600;
+            letter-spacing: 1px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        header p {
+            color: #a8d2ff;
+            font-size: 1.2rem;
+            max-width: 700px;
+            margin: 0 auto;
+            opacity: 0.9;
+        }
+        
+        .content-section {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+        
+        .add-reminder {
+            flex: 1;
+            min-width: 300px;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 8px 32px rgba(0, 34, 80, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            transition: transform 0.3s ease;
+        }
+        
+        .add-reminder:hover {
+            transform: translateY(-5px);
+        }
+        
+        .reminder-list {
+            flex: 2;
+            min-width: 300px;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 8px 32px rgba(0, 34, 80, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+        }
+        
+        .section-title {
+            color: #005a9e;
+            font-size: 1.8rem;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #e0ecf8;
+            position: relative;
+        }
+        
+        .section-title::after {
+            content: "";
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            width: 70px;
+            height: 4px;
+            background: #0081ca;
+            border-radius: 2px;
+        }
+        
+        .form-group {
+            margin-bottom: 25px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #005a9e;
+            font-weight: 600;
+            font-size: 1.05rem;
+        }
+        
+        .form-control {
+            width: 100%;
+            padding: 12px 15px;
+            font-size: 1.05rem;
+            border: 1px solid #c5dcef;
+            border-radius: 8px;
+            background: #f7fbff;
+            box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.05);
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+        
+        .form-control:focus {
+            outline: none;
+            border-color: #0081ca;
+            box-shadow: 0 0 0 3px rgba(0, 129, 202, 0.2);
+        }
+        
+        textarea.form-control {
+            min-height: 120px;
+            resize: vertical;
+        }
+        
+        .btn {
+            display: inline-block;
+            padding: 13px 28px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: white;
+            background: linear-gradient(135deg, #0081ca, #005a9e);
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(0, 81, 162, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0, 81, 162, 0.4);
+        }
+        
+        .btn:active {
+            transform: translateY(1px);
+            box-shadow: 0 3px 10px rgba(0, 81, 162, 0.3);
+        }
+        
+        .btn i {
+            margin-right: 10px;
+        }
+        
+        .btn-full {
+            width: 100%;
+            padding: 14px;
+        }
+        
+        .reminders-list-container {
+            max-height: 600px;
+            overflow-y: auto;
+            padding-right: 10px;
+        }
+        
+        .reminder-item {
+            background: linear-gradient(to right, #f7fbff, #e6f2ff);
+            border: 1px solid rgba(0, 129, 202, 0.15);
+            border-radius: 10px;
+            padding: 22px;
+            margin-bottom: 20px;
+            position: relative;
+            transform: translateY(0);
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 8px rgba(0, 34, 80, 0.08);
+            overflow: hidden;
+        }
+        
+        .reminder-item:last-child {
+            margin-bottom: 0;
+        }
+        
+        .reminder-item:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 15px rgba(0, 34, 80, 0.15);
+        }
+        
+        .reminder-item.high-priority {
+            border-left: 5px solid #e74c3c;
+        }
+        
+        .reminder-item.medium-priority {
+            border-left: 5px solid #f39c12;
+        }
+        
+        .reminder-item.low-priority {
+            border-left: 5px solid #2ecc71;
+        }
+        
+        .reminder-title {
+            font-size: 1.4rem;
+            font-weight: 600;
+            color: #005a9e;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .reminder-title i {
+            margin-right: 10px;
+            color: #0081ca;
+        }
+        
+        .reminder-content {
+            margin-bottom: 15px;
+            line-height: 1.6;
+            color: #444;
+        }
+        
+        .reminder-details {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            color: #555;
+            font-size: 0.95rem;
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid rgba(0, 129, 202, 0.15);
+        }
+        
+        .reminder-details div {
+            display: flex;
+            align-items: center;
+        }
+        
+        .reminder-details i {
+            margin-right: 8px;
+            color: #0081ca;
+        }
+        
+        .delete-btn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            width: 38px;
+            height: 38px;
+            background: rgba(231, 76, 60, 0.1);
+            color: #e74c3c;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 18px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: none;
+        }
+        
+        .delete-btn:hover {
+            background: #e74c3c;
+            color: white;
+            transform: scale(1.1);
+        }
+        
+        .priority-tag {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-left: 15px;
+        }
+        
+        .high-priority .priority-tag {
+            background-color: rgba(231, 76, 60, 0.15);
+            color: #e74c3c;
+        }
+        
+        .medium-priority .priority-tag {
+            background-color: rgba(243, 156, 18, 0.15);
+            color: #f39c12;
+        }
+        
+        .low-priority .priority-tag {
+            background-color: rgba(46, 204, 113, 0.15);
+            color: #2ecc71;
+        }
+        
+        .empty-list {
+            text-align: center;
+            padding: 40px 0;
+            color: #888;
+        }
+        
+        .empty-list i {
+            font-size: 3rem;
+            margin-bottom: 15px;
+            color: #d0d0d0;
+        }
+        
+        .empty-list p {
+            font-size: 1.2rem;
+            opacity: 0.7;
+        }
+        
+        footer {
+            text-align: center;
+            color: #a8d2ff;
+            padding: 30px 0 10px;
+            font-size: 1rem;
+            width: 100%;
+            opacity: 0.8;
+        }
+        
+        .statistics {
+            display: flex;
+            justify-content: space-around;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 12px;
+            padding: 25px;
+            margin-top: 20px;
+            box-shadow: 0 8px 32px rgba(0, 34, 80, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+        }
+        
+        .stat-box {
+            text-align: center;
+        }
+        
+        .stat-box h3 {
+            color: #005a9e;
+            font-size: 1.5rem;
+            margin-bottom: 5px;
+        }
+        
+        .stat-box p {
+            color: #777;
+            font-weight: 500;
+        }
+        
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            font-size: 0.85rem;
+            font-weight: 500;
+            padding: 3px 10px;
+            border-radius: 15px;
+            margin-left: 8px;
+        }
+        
+        @media (max-width: 768px) {
+            .content-section {
+                flex-direction: column;
+            }
+            
+            header h1 {
+                font-size: 2.1rem;
+            }
+            
+            .section-title {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>政府工作提醒系统</h1>
+            <p>为您的工作提供高效的任务管理和提醒服务，助力政务工作有序进行</p>
+        </header>
+        
+        <div class="content-section">
+            <div class="add-reminder">
+                <h2 class="section-title">添加新提醒</h2>
+                <div class="form-group">
+                    <label for="reminderTitle">任务标题</label>
+                    <input type="text" id="reminderTitle" class="form-control" placeholder="输入工作事项标题">
+                </div>
+                
+                <div class="form-group">
+                    <label for="reminderContent">任务内容</label>
+                    <textarea id="reminderContent" class="form-control" placeholder="输入工作事项的详细内容..."></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label for="reminderDate">截止日期</label>
+                    <input type="date" id="reminderDate" class="form-control">
+                </div>
+                
+                <div class="form-group">
+                    <label for="reminderPriority">优先级</label>
+                    <select id="reminderPriority" class="form-control">
+                        <option value="low">低优先级</option>
+                        <option value="medium" selected>中等优先级</option>
+                        <option value="high">高优先级</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="reminderDepartment">相关部门</label>
+                    <select id="reminderDepartment" class="form-control">
+                        <option value="办公室">办公室</option>
+                        <option value="财务部">财务部</option>
+                        <option value="人事部">人事部</option>
+                        <option value="信息中心">信息中心</option>
+                        <option value="政策研究室">政策研究室</option>
+                        <option value="法制办公室">法制办公室</option>
+                    </select>
+                </div>
+                
+                <button class="btn btn-full" id="addReminder">
+                    <i class="fas fa-plus"></i> 添加工作提醒
+                </button>
+            </div>
+            
+            <div class="reminder-list">
+                <h2 class="section-title">工作提醒列表
+                    <span class="badge" id="reminderCount">共4项任务</span>
+                </h2>
+                
+                <div class="reminders-list-container" id="remindersContainer">
+                    <div class="reminder-item high-priority">
+                        <h3 class="reminder-title">
+                            <i class="fas fa-exclamation-circle"></i> 
+                            上级紧急会议材料准备
+                            <span class="priority-tag">高优先级</span>
+                        </h3>
+                        <div class="reminder-content">
+                            今日下午上级领导将召开紧急工作会议，需准备会议材料包括：第一季度工作总结、当前存在的问题分析及下一步工作计划。
+                        </div>
+                        <div class="reminder-details">
+                            <div><i class="fas fa-calendar-day"></i> 截止日期: 2023年10月15日</div>
+                            <div><i class="fas fa-user-tag"></i> 部门: 办公室</div>
+                            <div><i class="fas fa-user"></i> 创建人: 张局长</div>
+                        </div>
+                        <button class="delete-btn"><i class="fas fa-trash-alt"></i></button>
+                    </div>
+                    
+                    <div class="reminder-item medium-priority">
+                        <h3 class="reminder-title">
+                            <i class="fas fa-chart-line"></i> 
+                            第三季度财政报告提交
+                            <span class="priority-tag">中优先级</span>
+                        </h3>
+                        <div class="reminder-content">
+                            第三季度财政总结报告需要在本周五下班前提交，包括各部门支出详细清单和下一季度预算规划。
+                        </div>
+                        <div class="reminder-details">
+                            <div><i class="fas fa-calendar-day"></i> 截止日期: 2023年10月20日</div>
+                            <div><i class="fas fa-user-tag"></i> 部门: 财务部</div>
+                            <div><i class="fas fa-user"></i> 创建人: 李主任</div>
+                        </div>
+                        <button class="delete-btn"><i class="fas fa-trash-alt"></i></button>
+                    </div>
+                    
+                    <div class="reminder-item high-priority">
+                        <h3 class="reminder-title">
+                            <i class="fas fa-server"></i> 
+                            信息系统安全升级
+                            <span class="priority-tag">高优先级</span>
+                        </h3>
+                        <div class="reminder-content">
+                            根据上级安全部门要求，需在10月底前完成内部信息系统安全升级，请各部门协调配合相关测试工作。
+                        </div>
+                        <div class="reminder-details">
+                            <div><i class="fas fa-calendar-day"></i> 截止日期: 2023年10月25日</div>
+                            <div><i class="fas fa-user-tag"></i> 部门: 信息中心</div>
+                            <div><i class="fas fa-user"></i> 创建人: 王主任</div>
+                        </div>
+                        <button class="delete-btn"><i class="fas fa-trash-alt"></i></button>
+                    </div>
+                    
+                    <div class="reminder-item low-priority">
+                        <h3 class="reminder-title">
+                            <i class="fas fa-users"></i> 
+                            干部培训报名
+                            <span class="priority-tag">低优先级</span>
+                        </h3>
+                        <div class="reminder-content">
+                            年度优秀干部培训计划报名开始，请各部门于本月底前提交推荐名单至人事处审批。
+                        </div>
+                        <div class="reminder-details">
+                            <div><i class="fas fa-calendar-day"></i> 截止日期: 2023年11月05日</div>
+                            <div><i class="fas fa-user-tag"></i> 部门: 人事部</div>
+                            <div><i class="fas fa-user"></i> 创建人: 赵处长</div>
+                        </div>
+                        <button class="delete-btn"><i class="fas fa-trash-alt"></i></button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="statistics">
+            <div class="stat-box">
+                <h3>4</h3>
+                <p>未完成项目</p>
+            </div>
+            <div class="stat-box">
+                <h3>2</h3>
+                <p>高优先级</p>
+            </div>
+            <div class="stat-box">
+                <h3>0</h3>
+                <p>已超期</p>
+            </div>
+            <div class="stat-box">
+                <h3>4</h3>
+                <p>部门涉及</p>
+            </div>
+        </div>
+        
+        <footer>
+            <p>© 2023 政府工作提醒系统 | 政务管理平台 | 当前时间: <span id="currentDateTime"></span></p>
+        </footer>
+    </div>
+
+    <script>
+        // 显示当前日期时间
+        function updateDateTime() {
+            const now = new Date();
+            const options = { 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric', 
+                weekday: 'long', 
+                hour: '2-digit', 
+                minute: '2-digit',
+                second: '2-digit'
+            };
+            document.getElementById('currentDateTime').textContent = now.toLocaleDateString('zh-CN', options);
+        }
+        
+        // 初始化日期时间并每秒更新
+        updateDateTime();
+        setInterval(updateDateTime, 1000);
+        
+        // 为所有删除按钮添加事件
+        document.querySelectorAll('.delete-btn').forEach(button => {
+            button.addEventListener('click', function() {
+                this.closest('.reminder-item').remove();
+                updateReminderCount();
+            });
+        });
+        
+        // 添加新提醒
+        document.getElementById('addReminder').addEventListener('click', function() {
+            const title = document.getElementById('reminderTitle').value;
+            const content = document.getElementById('reminderContent').value;
+            const date = document.getElementById('reminderDate').value;
+            const priority = document.getElementById('reminderPriority').value;
+            const department = document.getElementById('reminderDepartment').value;
+            
+            if (!title || !content) {
+                alert('请填写任务标题和内容！');
+                return;
+            }
+            
+            const formattedDate = formatDateInput(date);
+            
+            const priorityClassMap = {
+                'high': '高优先级',
+                'medium': '中优先级',
+                'low': '低优先级'
+            };
+            
+            const priorityClass = priority + '-priority';
+            const priorityText = priorityClassMap[priority];
+            
+            const reminderItem = document.createElement('div');
+            reminderItem.className = `reminder-item ${priorityClass}`;
+            reminderItem.innerHTML = `
+                <h3 class="reminder-title">
+                    <i class="fas ${getPriorityIcon(priority)}"></i> 
+                    ${title}
+                    <span class="priority-tag">${priorityText}</span>
+                </h3>
+                <div class="reminder-content">${content}</div>
+                <div class="reminder-details">
+                    <div><i class="fas fa-calendar-day"></i> 截止日期: ${formattedDate || '未指定'}</div>
+                    <div><i class="fas fa-user-tag"></i> 部门: ${department}</div>
+                    <div><i class="fas fa-user"></i> 创建人: 您的姓名</div>
+                </div>
+                <button class="delete-btn"><i class="fas fa-trash-alt"></i></button>
+            `;
+            
+            document.getElementById('remindersContainer').prepend(reminderItem);
+            
+            // 为新添加的提醒添加删除事件
+            reminderItem.querySelector('.delete-btn').addEventListener('click', function() {
+                reminderItem.remove();
+                updateReminderCount();
+            });
+            
+            // 清空表单
+            document.getElementById('reminderTitle').value = '';
+            document.getElementById('reminderContent').value = '';
+            document.getElementById('reminderDate').value = '';
+            document.getElementById('reminderPriority').value = 'medium';
+            
+            updateReminderCount();
+        });
+        
+        function getPriorityIcon(priority) {
+            switch(priority) {
+                case 'high': return 'fa-exclamation-circle';
+                case 'medium': return 'fa-chart-line';
+                case 'low': return 'fa-users';
+                default: return 'fa-tasks';
+            }
+        }
+        
+        function formatDateInput(dateStr) {
+            if (!dateStr) return '';
+            
+            const date = new Date(dateStr);
+            const options = { year: 'numeric', month: 'long', day: 'numeric' };
+            return date.toLocaleDateString('zh-CN', options);
+        }
+        
+        function updateReminderCount() {
+            const count = document.querySelectorAll('.reminder-item').length;
+            document.getElementById('reminderCount').textContent = `共${count}项任务`;
+        }
+        
+        // 初始化页面
+        updateReminderCount();
+    </script>
+</body>
+</html>
