@@ -1,673 +1,771 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>政府工作提醒系统</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Helvetica Neue', Arial, sans-serif;
-        }
-        
-        body {
-            background: linear-gradient(135deg, #1a3953 0%, #0c1e33 100%);
-            color: #333;
-            min-height: 100vh;
-            padding: 40px 20px;
-            position: relative;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-        
-        body::before {
-            content: "";
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: url('data:image/svg+xml;utf8,<svg width="100" height="100" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect width="100" height="100" fill="transparent"/><path d="M0 0L100 100M100 0L0 100" stroke="rgba(255,255,255,0.05)" stroke-width="1" /></svg>');
-            opacity: 0.6;
-            z-index: -1;
-        }
-        
-        .container {
-            width: 100%;
-            max-width: 1200px;
-            position: relative;
-        }
-        
-        header {
-            text-align: center;
-            padding: 30px 0;
-            margin-bottom: 30px;
-            position: relative;
-        }
-        
-        header::after {
-            content: "";
-            position: absolute;
-            bottom: 0;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 120px;
-            height: 4px;
-            background: linear-gradient(90deg, #0081ca, #00b3fa);
-            border-radius: 2px;
-        }
-        
-        header h1 {
-            color: #fff;
-            font-size: 2.8rem;
-            margin-bottom: 10px;
-            font-weight: 600;
-            letter-spacing: 1px;
-            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
-        }
-        
-        header p {
-            color: #a8d2ff;
-            font-size: 1.2rem;
-            max-width: 700px;
-            margin: 0 auto;
-            opacity: 0.9;
-        }
-        
-        .content-section {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 30px;
-            margin-bottom: 40px;
-        }
-        
-        .add-reminder {
-            flex: 1;
-            min-width: 300px;
-            background: rgba(255, 255, 255, 0.95);
-            border-radius: 12px;
-            padding: 30px;
-            box-shadow: 0 8px 32px rgba(0, 34, 80, 0.4);
-            border: 1px solid rgba(255, 255, 255, 0.18);
-            transition: transform 0.3s ease;
-        }
-        
-        .add-reminder:hover {
-            transform: translateY(-5px);
-        }
-        
-        .reminder-list {
-            flex: 2;
-            min-width: 300px;
-            background: rgba(255, 255, 255, 0.95);
-            border-radius: 12px;
-            padding: 30px;
-            box-shadow: 0 8px 32px rgba(0, 34, 80, 0.4);
-            border: 1px solid rgba(255, 255, 255, 0.18);
-        }
-        
-        .section-title {
-            color: #005a9e;
-            font-size: 1.8rem;
-            margin-bottom: 25px;
-            padding-bottom: 15px;
-            border-bottom: 2px solid #e0ecf8;
-            position: relative;
-        }
-        
-        .section-title::after {
-            content: "";
-            position: absolute;
-            bottom: -2px;
-            left: 0;
-            width: 70px;
-            height: 4px;
-            background: #0081ca;
-            border-radius: 2px;
-        }
-        
-        .form-group {
-            margin-bottom: 25px;
-        }
-        
-        .form-group label {
-            display: block;
-            margin-bottom: 8px;
-            color: #005a9e;
-            font-weight: 600;
-            font-size: 1.05rem;
-        }
-        
-        .form-control {
-            width: 100%;
-            padding: 12px 15px;
-            font-size: 1.05rem;
-            border: 1px solid #c5dcef;
-            border-radius: 8px;
-            background: #f7fbff;
-            box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.05);
-            transition: border-color 0.3s, box-shadow 0.3s;
-        }
-        
-        .form-control:focus {
-            outline: none;
-            border-color: #0081ca;
-            box-shadow: 0 0 0 3px rgba(0, 129, 202, 0.2);
-        }
-        
-        textarea.form-control {
-            min-height: 120px;
-            resize: vertical;
-        }
-        
-        .btn {
-            display: inline-block;
-            padding: 13px 28px;
-            font-size: 1.1rem;
-            font-weight: 600;
-            color: white;
-            background: linear-gradient(135deg, #0081ca, #005a9e);
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            text-align: center;
-            transition: all 0.3s ease;
-            box-shadow: 0 5px 15px rgba(0, 81, 162, 0.3);
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .btn:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 8px 20px rgba(0, 81, 162, 0.4);
-        }
-        
-        .btn:active {
-            transform: translateY(1px);
-            box-shadow: 0 3px 10px rgba(0, 81, 162, 0.3);
-        }
-        
-        .btn i {
-            margin-right: 10px;
-        }
-        
-        .btn-full {
-            width: 100%;
-            padding: 14px;
-        }
-        
-        .reminders-list-container {
-            max-height: 600px;
-            overflow-y: auto;
-            padding-right: 10px;
-        }
-        
-        .reminder-item {
-            background: linear-gradient(to right, #f7fbff, #e6f2ff);
-            border: 1px solid rgba(0, 129, 202, 0.15);
-            border-radius: 10px;
-            padding: 22px;
-            margin-bottom: 20px;
-            position: relative;
-            transform: translateY(0);
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 8px rgba(0, 34, 80, 0.08);
-            overflow: hidden;
-        }
-        
-        .reminder-item:last-child {
-            margin-bottom: 0;
-        }
-        
-        .reminder-item:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 6px 15px rgba(0, 34, 80, 0.15);
-        }
-        
-        .reminder-item.high-priority {
-            border-left: 5px solid #e74c3c;
-        }
-        
-        .reminder-item.medium-priority {
-            border-left: 5px solid #f39c12;
-        }
-        
-        .reminder-item.low-priority {
-            border-left: 5px solid #2ecc71;
-        }
-        
-        .reminder-title {
-            font-size: 1.4rem;
-            font-weight: 600;
-            color: #005a9e;
-            margin-bottom: 10px;
-            display: flex;
-            align-items: center;
-        }
-        
-        .reminder-title i {
-            margin-right: 10px;
-            color: #0081ca;
-        }
-        
-        .reminder-content {
-            margin-bottom: 15px;
-            line-height: 1.6;
-            color: #444;
-        }
-        
-        .reminder-details {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 20px;
-            color: #555;
-            font-size: 0.95rem;
-            margin-top: 15px;
-            padding-top: 15px;
-            border-top: 1px solid rgba(0, 129, 202, 0.15);
-        }
-        
-        .reminder-details div {
-            display: flex;
-            align-items: center;
-        }
-        
-        .reminder-details i {
-            margin-right: 8px;
-            color: #0081ca;
-        }
-        
-        .delete-btn {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            width: 38px;
-            height: 38px;
-            background: rgba(231, 76, 60, 0.1);
-            color: #e74c3c;
-            border-radius: 50%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-size: 18px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            border: none;
-        }
-        
-        .delete-btn:hover {
-            background: #e74c3c;
-            color: white;
-            transform: scale(1.1);
-        }
-        
-        .priority-tag {
-            display: inline-block;
-            padding: 4px 12px;
-            border-radius: 20px;
-            font-size: 0.9rem;
-            font-weight: 600;
-            margin-left: 15px;
-        }
-        
-        .high-priority .priority-tag {
-            background-color: rgba(231, 76, 60, 0.15);
-            color: #e74c3c;
-        }
-        
-        .medium-priority .priority-tag {
-            background-color: rgba(243, 156, 18, 0.15);
-            color: #f39c12;
-        }
-        
-        .low-priority .priority-tag {
-            background-color: rgba(46, 204, 113, 0.15);
-            color: #2ecc71;
-        }
-        
-        .empty-list {
-            text-align: center;
-            padding: 40px 0;
-            color: #888;
-        }
-        
-        .empty-list i {
-            font-size: 3rem;
-            margin-bottom: 15px;
-            color: #d0d0d0;
-        }
-        
-        .empty-list p {
-            font-size: 1.2rem;
-            opacity: 0.7;
-        }
-        
-        footer {
-            text-align: center;
-            color: #a8d2ff;
-            padding: 30px 0 10px;
-            font-size: 1rem;
-            width: 100%;
-            opacity: 0.8;
-        }
-        
-        .statistics {
-            display: flex;
-            justify-content: space-around;
-            background: rgba(255, 255, 255, 0.95);
-            border-radius: 12px;
-            padding: 25px;
-            margin-top: 20px;
-            box-shadow: 0 8px 32px rgba(0, 34, 80, 0.4);
-            border: 1px solid rgba(255, 255, 255, 0.18);
-        }
-        
-        .stat-box {
-            text-align: center;
-        }
-        
-        .stat-box h3 {
-            color: #005a9e;
-            font-size: 1.5rem;
-            margin-bottom: 5px;
-        }
-        
-        .stat-box p {
-            color: #777;
-            font-weight: 500;
-        }
-        
-        .badge {
-            display: inline-flex;
-            align-items: center;
-            font-size: 0.85rem;
-            font-weight: 500;
-            padding: 3px 10px;
-            border-radius: 15px;
-            margin-left: 8px;
-        }
-        
-        @media (max-width: 768px) {
-            .content-section {
-                flex-direction: column;
-            }
-            
-            header h1 {
-                font-size: 2.1rem;
-            }
-            
-            .section-title {
-                font-size: 1.5rem;
-            }
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>唐山市路北区市政所管理科 · 工作提醒系统 2026</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Helvetica Neue', Arial, 'Microsoft YaHei', sans-serif; }
+
+    body {
+      background: linear-gradient(135deg, #1a3953 0%, #0c1e33 100%);
+      color: #333;
+      min-height: 100vh;
+      padding: 36px 20px;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    body::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: url('data:image/svg+xml;utf8,<svg width="100" height="100" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect width="100" height="100" fill="transparent"/><path d="M0 0L100 100M100 0L0 100" stroke="rgba(255,255,255,0.05)" stroke-width="1" /></svg>');
+      opacity: 0.6;
+      z-index: -1;
+    }
+
+    .container { width: 100%; max-width: 1200px; position: relative; }
+
+    header { text-align: center; padding: 24px 0 28px; margin-bottom: 28px; position: relative; }
+    header::after {
+      content: ""; position: absolute; bottom: 0; left: 50%; transform: translateX(-50%);
+      width: 140px; height: 4px; background: linear-gradient(90deg, #0081ca, #00b3fa); border-radius: 2px;
+    }
+    header h1 { color: #fff; font-size: 2.2rem; margin-bottom: 10px; font-weight: 600; letter-spacing: 0.5px; text-shadow: 0 2px 4px rgba(0,0,0,0.3); }
+    header .sub { color: #a8d2ff; font-size: 1.05rem; opacity: 0.92; }
+    header .version-badge {
+      display: inline-block; margin-top: 10px; padding: 4px 14px;
+      background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.25);
+      border-radius: 20px; color: #d7ecff; font-size: 0.85rem; letter-spacing: 1px;
+    }
+
+    .content-section { display: flex; flex-wrap: wrap; gap: 24px; margin-bottom: 24px; }
+
+    .add-reminder, .reminder-list {
+      background: rgba(255,255,255,0.96);
+      border-radius: 14px;
+      padding: 28px;
+      box-shadow: 0 8px 32px rgba(0, 34, 80, 0.4);
+      border: 1px solid rgba(255,255,255,0.18);
+    }
+    .add-reminder { flex: 1; min-width: 300px; }
+    .reminder-list { flex: 2; min-width: 340px; display: flex; flex-direction: column; }
+
+    .section-title {
+      color: #005a9e; font-size: 1.55rem; margin-bottom: 22px; padding-bottom: 14px;
+      border-bottom: 2px solid #e0ecf8; position: relative;
+    }
+    .section-title::after {
+      content: ""; position: absolute; bottom: -2px; left: 0; width: 64px; height: 4px;
+      background: #0081ca; border-radius: 2px;
+    }
+
+    .form-group { margin-bottom: 20px; }
+    .form-group label { display: block; margin-bottom: 7px; color: #005a9e; font-weight: 600; font-size: 0.98rem; }
+    .form-control {
+      width: 100%; padding: 11px 14px; font-size: 1rem;
+      border: 1px solid #c5dcef; border-radius: 8px; background: #f7fbff;
+      box-shadow: inset 0 1px 3px rgba(0,0,0,0.04);
+      transition: border-color 0.25s, box-shadow 0.25s;
+    }
+    .form-control:focus { outline: none; border-color: #0081ca; box-shadow: 0 0 0 3px rgba(0,129,202,0.18); }
+    textarea.form-control { min-height: 96px; resize: vertical; }
+
+    .btn {
+      display: inline-block; padding: 12px 26px; font-size: 1.02rem; font-weight: 600;
+      color: #fff; background: linear-gradient(135deg, #0081ca, #005a9e);
+      border: none; border-radius: 8px; cursor: pointer; text-align: center;
+      transition: all 0.25s ease; box-shadow: 0 5px 15px rgba(0,81,162,0.3);
+    }
+    .btn:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(0,81,162,0.4); }
+    .btn:active { transform: translateY(0); }
+    .btn-full { width: 100%; padding: 13px; }
+
+    .reminders-list-container { flex: 1; min-height: 260px; }
+
+    .reminder-item {
+      background: linear-gradient(to right, #f7fbff, #eaf4ff);
+      border: 1px solid rgba(0,129,202,0.14);
+      border-radius: 11px;
+      padding: 20px 22px;
+      margin-bottom: 16px;
+      position: relative;
+      transition: all 0.25s ease;
+      box-shadow: 0 3px 8px rgba(0,34,80,0.06);
+    }
+    .reminder-item:last-child { margin-bottom: 0; }
+    .reminder-item:hover { transform: translateY(-2px); box-shadow: 0 6px 16px rgba(0,34,80,0.13); }
+    .reminder-item.high-priority { border-left: 5px solid #e74c3c; }
+    .reminder-item.medium-priority { border-left: 5px solid #f39c12; }
+    .reminder-item.low-priority { border-left: 5px solid #2ecc71; }
+
+    .reminder-title {
+      font-size: 1.18rem; font-weight: 600; color: #005a9e; margin-bottom: 8px;
+      display: flex; align-items: center; flex-wrap: wrap; gap: 8px;
+      padding-right: 40px;
+    }
+    .reminder-title i { color: #0081ca; margin-right: 2px; }
+
+    .priority-tag {
+      display: inline-block; padding: 3px 11px; border-radius: 20px;
+      font-size: 0.82rem; font-weight: 600; white-space: nowrap;
+    }
+    .high-priority .priority-tag { background-color: rgba(231,76,60,0.14); color: #c0392b; }
+    .medium-priority .priority-tag { background-color: rgba(243,156,18,0.14); color: #b9770e; }
+    .low-priority .priority-tag { background-color: rgba(46,204,113,0.14); color: #1e8449; }
+
+    .reminder-content { margin-bottom: 12px; line-height: 1.62; color: #444; font-size: 0.96rem; white-space: pre-wrap; }
+
+    .reminder-details {
+      display: flex; flex-wrap: wrap; gap: 16px 22px;
+      color: #555; font-size: 0.9rem; padding-top: 12px;
+      border-top: 1px solid rgba(0,129,202,0.12);
+    }
+    .reminder-details div { display: flex; align-items: center; gap: 6px; }
+    .reminder-details i { color: #0081ca; }
+
+    .delete-btn {
+      position: absolute; top: 16px; right: 16px; width: 34px; height: 34px;
+      background: rgba(231,76,60,0.08); color: #e74c3c; border-radius: 50%;
+      display: flex; justify-content: center; align-items: center;
+      font-size: 15px; cursor: pointer; transition: all 0.25s ease; border: none;
+    }
+    .delete-btn:hover { background: #e74c3c; color: #fff; transform: scale(1.08); }
+
+    .empty-list { text-align: center; padding: 50px 0; color: #888; }
+    .empty-list i { font-size: 2.8rem; margin-bottom: 14px; color: #ccd9e5; }
+    .empty-list p { font-size: 1.08rem; opacity: 0.75; }
+
+    /* 分页 */
+    .pagination-bar {
+      display: flex; align-items: center; justify-content: space-between;
+      flex-wrap: wrap; gap: 12px;
+      margin-top: 20px; padding-top: 18px;
+      border-top: 1px solid #e0ecf8;
+    }
+    .pagination-info { font-size: 0.9rem; color: #6b7f93; }
+    .pagination-info strong { color: #005a9e; }
+
+    .pagination-controls { display: flex; align-items: center; gap: 6px; }
+    .page-btn {
+      min-width: 34px; height: 34px; padding: 0 10px;
+      border: 1px solid #c5dcef; background: #f7fbff; color: #005a9e;
+      border-radius: 7px; cursor: pointer; font-size: 0.9rem; font-weight: 600;
+      transition: all 0.2s ease;
+    }
+    .page-btn:hover:not(:disabled) { background: #e0ecf8; border-color: #0081ca; }
+    .page-btn.active { background: #0081ca; color: #fff; border-color: #0081ca; }
+    .page-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+    /* 统计 */
+    .statistics {
+      display: flex; justify-content: space-around; flex-wrap: wrap; gap: 12px;
+      background: rgba(255,255,255,0.96); border-radius: 14px; padding: 22px 18px;
+      margin-top: 20px; box-shadow: 0 8px 32px rgba(0,34,80,0.4);
+      border: 1px solid rgba(255,255,255,0.18);
+    }
+    .stat-box { text-align: center; min-width: 100px; }
+    .stat-box h3 { color: #005a9e; font-size: 1.45rem; margin-bottom: 4px; }
+    .stat-box p { color: #6b7f93; font-size: 0.88rem; font-weight: 500; }
+
+    footer {
+      text-align: center; color: #a8d2ff; padding: 28px 0 8px;
+      font-size: 0.9rem; width: 100%; opacity: 0.8; line-height: 1.7;
+    }
+
+    /* 自检面板 */
+    .audit-panel {
+      margin-top: 18px; background: rgba(255,255,255,0.08);
+      border: 1px dashed rgba(168,210,255,0.35); border-radius: 12px;
+      padding: 16px 20px; color: #c9e2ff; font-size: 0.86rem;
+    }
+    .audit-panel h4 { color: #fff; font-size: 0.95rem; margin-bottom: 10px; display: flex; align-items: center; gap: 7px; }
+    .audit-row { display: flex; justify-content: space-between; padding: 5px 0; border-bottom: 1px solid rgba(255,255,255,0.07); }
+    .audit-row:last-child { border-bottom: none; }
+    .audit-pass { color: #7dffa8; font-weight: 600; }
+    .audit-fail { color: #ff9b9b; font-weight: 600; }
+
+    @media (max-width: 768px) {
+      body { padding: 20px 12px; }
+      .content-section { flex-direction: column; }
+      header h1 { font-size: 1.55rem; }
+      .section-title { font-size: 1.3rem; }
+      .add-reminder, .reminder-list { padding: 20px; }
+      .stat-box h3 { font-size: 1.2rem; }
+    }
+  </style>
 </head>
 <body>
-    <div class="container">
-        <header>
-            <h1>政府工作提醒系统</h1>
-            <p>为您的工作提供高效的任务管理和提醒服务，助力政务工作有序进行</p>
-        </header>
-        
-        <div class="content-section">
-            <div class="add-reminder">
-                <h2 class="section-title">添加新提醒</h2>
-                <div class="form-group">
-                    <label for="reminderTitle">任务标题</label>
-                    <input type="text" id="reminderTitle" class="form-control" placeholder="输入工作事项标题">
-                </div>
-                
-                <div class="form-group">
-                    <label for="reminderContent">任务内容</label>
-                    <textarea id="reminderContent" class="form-control" placeholder="输入工作事项的详细内容..."></textarea>
-                </div>
-                
-                <div class="form-group">
-                    <label for="reminderDate">截止日期</label>
-                    <input type="date" id="reminderDate" class="form-control">
-                </div>
-                
-                <div class="form-group">
-                    <label for="reminderPriority">优先级</label>
-                    <select id="reminderPriority" class="form-control">
-                        <option value="low">低优先级</option>
-                        <option value="medium" selected>中等优先级</option>
-                        <option value="high">高优先级</option>
-                    </select>
-                </div>
-                
-                <div class="form-group">
-                    <label for="reminderDepartment">相关部门</label>
-                    <select id="reminderDepartment" class="form-control">
-                        <option value="办公室">办公室</option>
-                        <option value="财务部">财务部</option>
-                        <option value="人事部">人事部</option>
-                        <option value="信息中心">信息中心</option>
-                        <option value="政策研究室">政策研究室</option>
-                        <option value="法制办公室">法制办公室</option>
-                    </select>
-                </div>
-                
-                <button class="btn btn-full" id="addReminder">
-                    <i class="fas fa-plus"></i> 添加工作提醒
-                </button>
-            </div>
-            
-            <div class="reminder-list">
-                <h2 class="section-title">工作提醒列表
-                    <span class="badge" id="reminderCount">共4项任务</span>
-                </h2>
-                
-                <div class="reminders-list-container" id="remindersContainer">
-                    <div class="reminder-item high-priority">
-                        <h3 class="reminder-title">
-                            <i class="fas fa-exclamation-circle"></i> 
-                            上级紧急会议材料准备
-                            <span class="priority-tag">高优先级</span>
-                        </h3>
-                        <div class="reminder-content">
-                            今日下午上级领导将召开紧急工作会议，需准备会议材料包括：第一季度工作总结、当前存在的问题分析及下一步工作计划。
-                        </div>
-                        <div class="reminder-details">
-                            <div><i class="fas fa-calendar-day"></i> 截止日期: 2023年10月15日</div>
-                            <div><i class="fas fa-user-tag"></i> 部门: 办公室</div>
-                            <div><i class="fas fa-user"></i> 创建人: 张局长</div>
-                        </div>
-                        <button class="delete-btn"><i class="fas fa-trash-alt"></i></button>
-                    </div>
-                    
-                    <div class="reminder-item medium-priority">
-                        <h3 class="reminder-title">
-                            <i class="fas fa-chart-line"></i> 
-                            第三季度财政报告提交
-                            <span class="priority-tag">中优先级</span>
-                        </h3>
-                        <div class="reminder-content">
-                            第三季度财政总结报告需要在本周五下班前提交，包括各部门支出详细清单和下一季度预算规划。
-                        </div>
-                        <div class="reminder-details">
-                            <div><i class="fas fa-calendar-day"></i> 截止日期: 2023年10月20日</div>
-                            <div><i class="fas fa-user-tag"></i> 部门: 财务部</div>
-                            <div><i class="fas fa-user"></i> 创建人: 李主任</div>
-                        </div>
-                        <button class="delete-btn"><i class="fas fa-trash-alt"></i></button>
-                    </div>
-                    
-                    <div class="reminder-item high-priority">
-                        <h3 class="reminder-title">
-                            <i class="fas fa-server"></i> 
-                            信息系统安全升级
-                            <span class="priority-tag">高优先级</span>
-                        </h3>
-                        <div class="reminder-content">
-                            根据上级安全部门要求，需在10月底前完成内部信息系统安全升级，请各部门协调配合相关测试工作。
-                        </div>
-                        <div class="reminder-details">
-                            <div><i class="fas fa-calendar-day"></i> 截止日期: 2023年10月25日</div>
-                            <div><i class="fas fa-user-tag"></i> 部门: 信息中心</div>
-                            <div><i class="fas fa-user"></i> 创建人: 王主任</div>
-                        </div>
-                        <button class="delete-btn"><i class="fas fa-trash-alt"></i></button>
-                    </div>
-                    
-                    <div class="reminder-item low-priority">
-                        <h3 class="reminder-title">
-                            <i class="fas fa-users"></i> 
-                            干部培训报名
-                            <span class="priority-tag">低优先级</span>
-                        </h3>
-                        <div class="reminder-content">
-                            年度优秀干部培训计划报名开始，请各部门于本月底前提交推荐名单至人事处审批。
-                        </div>
-                        <div class="reminder-details">
-                            <div><i class="fas fa-calendar-day"></i> 截止日期: 2023年11月05日</div>
-                            <div><i class="fas fa-user-tag"></i> 部门: 人事部</div>
-                            <div><i class="fas fa-user"></i> 创建人: 赵处长</div>
-                        </div>
-                        <button class="delete-btn"><i class="fas fa-trash-alt"></i></button>
-                    </div>
-                </div>
-            </div>
+<div class="container">
+
+  <header>
+    <h1><i class="fas fa-hard-hat" style="margin-right: 10px; color: #4db8ff;"></i>唐山市路北区市政所管理科</h1>
+    <p class="sub">工作提醒系统 · 市政设施巡查 / 维护 / 督办 一体化任务管理</p>
+    <span class="version-badge">2026 版</span>
+  </header>
+
+  <div class="content-section">
+    <!-- 添加提醒 -->
+    <div class="add-reminder">
+      <h2 class="section-title"><i class="fas fa-plus-circle" style="margin-right: 8px;"></i>添加新提醒</h2>
+      <form id="reminderForm">
+        <div class="form-group">
+          <label for="title">提醒标题 *</label>
+          <input type="text" id="title" class="form-control" placeholder="例如：建华道井盖缺失应急处置" required maxlength="80">
         </div>
-        
-        <div class="statistics">
-            <div class="stat-box">
-                <h3>4</h3>
-                <p>未完成项目</p>
-            </div>
-            <div class="stat-box">
-                <h3>2</h3>
-                <p>高优先级</p>
-            </div>
-            <div class="stat-box">
-                <h3>0</h3>
-                <p>已超期</p>
-            </div>
-            <div class="stat-box">
-                <h3>4</h3>
-                <p>部门涉及</p>
-            </div>
+
+        <div class="form-group">
+          <label for="content">提醒内容 *</label>
+          <textarea id="content" class="form-control" placeholder="填写具体事项、要求或注意事项…" required maxlength="500"></textarea>
         </div>
-        
-        <footer>
-            <p>© 2023 政府工作提醒系统 | 政务管理平台 | 当前时间: <span id="currentDateTime"></span></p>
-        </footer>
+
+        <div class="form-group">
+          <label for="priority">优先级</label>
+          <select id="priority" class="form-control">
+            <option value="high">高优先级</option>
+            <option value="medium" selected>中优先级</option>
+            <option value="low">低优先级</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="deadline">截止日期</label>
+          <input type="date" id="deadline" class="form-control">
+        </div>
+
+        <div class="form-group">
+          <label for="handler">办事人 *</label>
+          <input type="text" id="handler" class="form-control" list="handlerList" placeholder="输入或选择办事人姓名" required maxlength="20">
+          <datalist id="handlerList">
+            <option value="张建军">
+            <option value="李卫东">
+            <option value="王海涛">
+            <option value="刘志刚">
+            <option value="赵明辉">
+            <option value="陈立新">
+            <option value="杨文斌">
+            <option value="孙国栋">
+          </datalist>
+          <div style="font-size: 0.78rem; color: #8ba3b8; margin-top: 5px;">姓名可自由输入，系统会在本机记住你用过的人名。</div>
+        </div>
+
+        <div class="form-group">
+          <label for="creator">创建人</label>
+          <input type="text" id="creator" class="form-control" placeholder="默认为“管理科值班员”" maxlength="20">
+        </div>
+
+        <button type="submit" class="btn btn-full"><i class="fas fa-bell" style="margin-right: 6px;"></i>添加提醒</button>
+      </form>
     </div>
 
-    <script>
-        // 显示当前日期时间
-        function updateDateTime() {
-            const now = new Date();
-            const options = { 
-                year: 'numeric', 
-                month: 'long', 
-                day: 'numeric', 
-                weekday: 'long', 
-                hour: '2-digit', 
-                minute: '2-digit',
-                second: '2-digit'
-            };
-            document.getElementById('currentDateTime').textContent = now.toLocaleDateString('zh-CN', options);
+    <!-- 提醒列表 -->
+    <div class="reminder-list">
+      <h2 class="section-title"><i class="fas fa-list-ul" style="margin-right: 8px;"></i>工作提醒列表 <span id="totalBadge" style="font-size: 0.9rem; color: #6b7f93; font-weight: 400;">共 0 项</span></h2>
+      <div class="reminders-list-container" id="remindersContainer"></div>
+
+      <!-- 分页条 -->
+      <div class="pagination-bar">
+        <div class="pagination-info" id="paginationInfo">—</div>
+        <div class="pagination-controls" id="paginationControls"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 统计 -->
+  <div class="statistics">
+    <div class="stat-box"><h3 id="statTotal">0</h3><p>全部提醒</p></div>
+    <div class="stat-box"><h3 id="statHigh">0</h3><p>高优先级</p></div>
+    <div class="stat-box"><h3 id="statOverdue">0</h3><p>已超期</p></div>
+    <div class="stat-box"><h3 id="statHandlers">0</h3><p>办事人涉及</p></div>
+  </div>
+
+  <!-- 自检面板 -->
+  <div class="audit-panel">
+    <h4><i class="fas fa-shield-alt"></i> 持久化自检</h4>
+    <div class="audit-row"><span>localStorage 中存在提醒数据</span><span id="auditData">检测中…</span></div>
+    <div class="audit-row"><span>当前页码已持久化</span><span id="auditPage">检测中…</span></div>
+    <div class="audit-row"><span>刷新后数据保持一致</span><span id="auditConsistent">检测中…</span></div>
+    <div class="audit-row"><span>存储键名</span><span style="color:#8fd4ff;">lbb_szglk_reminders_v2026 / lbb_szglk_page_v2026</span></div>
+  </div>
+
+  <footer>
+    <p>© 2026 唐山市路北区市政所管理科 · 内部工作提醒平台</p>
+    <p>当前时间：<span id="currentDateTime">—</span></p>
+  </footer>
+</div>
+
+<script>
+(function () {
+  'use strict';
+
+  // ============================================================
+  // 常量与状态
+  // ============================================================
+  const STORAGE_KEY_DATA = 'lbb_szglk_reminders_v2026';
+  const STORAGE_KEY_PAGE = 'lbb_szglk_page_v2026';
+  const STORAGE_KEY_HANDLERS = 'lbb_szglk_handlers_v2026';
+  const PAGE_SIZE = 3;
+
+  let reminders = [];
+  let currentPage = 1;
+  let handlerHistory = [];
+
+  // ============================================================
+  // DOM 引用
+  // ============================================================
+  const form = document.getElementById('reminderForm');
+  const titleInput = document.getElementById('title');
+  const contentInput = document.getElementById('content');
+  const prioritySelect = document.getElementById('priority');
+  const deadlineInput = document.getElementById('deadline');
+  const handlerInput = document.getElementById('handler');
+  const creatorInput = document.getElementById('creator');
+  const handlerDatalist = document.getElementById('handlerList');
+  const container = document.getElementById('remindersContainer');
+  const totalBadge = document.getElementById('totalBadge');
+  const paginationInfo = document.getElementById('paginationInfo');
+  const paginationControls = document.getElementById('paginationControls');
+  const statTotal = document.getElementById('statTotal');
+  const statHigh = document.getElementById('statHigh');
+  const statOverdue = document.getElementById('statOverdue');
+  const statHandlers = document.getElementById('statHandlers');
+
+  // ============================================================
+  // 工具函数
+  // ============================================================
+  function uid() {
+    return Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+  }
+
+  function todayStr() {
+    const d = new Date();
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${y}-${m}-${day}`;
+  }
+
+  function formatDateCn(iso) {
+    if (!iso) return '未设置';
+    const parts = iso.split('-');
+    if (parts.length !== 3) return iso;
+    return `${parts[0]}年${parseInt(parts[1], 10)}月${parseInt(parts[2], 10)}日`;
+  }
+
+  function isOverdue(reminder) {
+    if (!reminder.deadline) return false;
+    return reminder.deadline < todayStr();
+  }
+
+  function escapeHtml(str) {
+    if (!str) return '';
+    return String(str)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  }
+
+  // ============================================================
+  // 持久化：读取
+  // ============================================================
+  function loadFromStorage() {
+    // 数据
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY_DATA);
+      reminders = raw ? JSON.parse(raw) : [];
+      if (!Array.isArray(reminders)) reminders = [];
+    } catch (e) {
+      reminders = [];
+    }
+
+    // 页码
+    try {
+      const p = parseInt(localStorage.getItem(STORAGE_KEY_PAGE), 10);
+      currentPage = (Number.isFinite(p) && p >= 1) ? p : 1;
+    } catch (e) {
+      currentPage = 1;
+    }
+
+    // 办事人历史
+    try {
+      const h = localStorage.getItem(STORAGE_KEY_HANDLERS);
+      handlerHistory = h ? JSON.parse(h) : [];
+      if (!Array.isArray(handlerHistory)) handlerHistory = [];
+    } catch (e) {
+      handlerHistory = [];
+    }
+
+    // 内置示例办事人
+    const defaults = ['张建军', '李卫东', '王海涛', '刘志刚', '赵明辉', '陈立新'];
+    defaults.forEach(name => {
+      if (!handlerHistory.includes(name)) handlerHistory.push(name);
+    });
+
+    // 同步 datalist
+    renderHandlerDatalist();
+  }
+
+  // ============================================================
+  // 持久化：保存
+  // ============================================================
+  function saveData() {
+    localStorage.setItem(STORAGE_KEY_DATA, JSON.stringify(reminders));
+  }
+
+  function savePage() {
+    localStorage.setItem(STORAGE_KEY_PAGE, String(currentPage));
+  }
+
+  function saveHandlers() {
+    localStorage.setItem(STORAGE_KEY_HANDLERS, JSON.stringify(handlerHistory));
+  }
+
+  // ============================================================
+  // 分页计算
+  // ============================================================
+  function totalPages() {
+    return Math.max(1, Math.ceil(reminders.length / PAGE_SIZE));
+  }
+
+  function clampPage() {
+    const tp = totalPages();
+    if (currentPage > tp) currentPage = tp;
+    if (currentPage < 1) currentPage = 1;
+  }
+
+  function paginatedReminders() {
+    clampPage();
+    const start = (currentPage - 1) * PAGE_SIZE;
+    return reminders.slice(start, start + PAGE_SIZE);
+  }
+
+  // ============================================================
+  // 渲染：办事人 datalist
+  // ============================================================
+  function renderHandlerDatalist() {
+    handlerDatalist.innerHTML = '';
+    const seen = new Set();
+    handlerHistory.forEach(name => {
+      if (!name || seen.has(name)) return;
+      seen.add(name);
+      const opt = document.createElement('option');
+      opt.value = name;
+      handlerDatalist.appendChild(opt);
+    });
+  }
+
+  // ============================================================
+  // 渲染：列表 + 分页
+  // ============================================================
+  function render() {
+    clampPage();
+    const list = paginatedReminders();
+    const total = reminders.length;
+    const tp = totalPages();
+
+    totalBadge.textContent = `共 ${total} 项`;
+
+    // ---- 列表 ----
+    if (list.length === 0) {
+      container.innerHTML = `
+        <div class="empty-list">
+          <i class="fas fa-inbox"></i>
+          <p>暂无工作提醒，请在上方添加。</p>
+        </div>`;
+    } else {
+      container.innerHTML = list.map(r => {
+        const overdue = isOverdue(r);
+        const deadlineText = r.deadline
+          ? `${formatDateCn(r.deadline)}${overdue ? ' <span style="color:#e74c3c;font-weight:600;">(已超期)</span>' : ''}`
+          : '未设置';
+        return `
+          <div class="reminder-item ${r.priority}-priority" data-id="${r.id}">
+            <button class="delete-btn" data-delete="${r.id}" title="删除此提醒">
+              <i class="fas fa-trash-alt"></i>
+            </button>
+            <div class="reminder-title">
+              <i class="fas fa-bell"></i>
+              ${escapeHtml(r.title)}
+              <span class="priority-tag">${r.priority === 'high' ? '高优先级' : r.priority === 'medium' ? '中优先级' : '低优先级'}</span>
+            </div>
+            <div class="reminder-content">${escapeHtml(r.content)}</div>
+            <div class="reminder-details">
+              <div><i class="fas fa-calendar-day"></i> 截止日期: ${deadlineText}</div>
+              <div><i class="fas fa-user-tag"></i> 办事人: ${escapeHtml(r.handler)}</div>
+              <div><i class="fas fa-user"></i> 创建人: ${escapeHtml(r.creator || '管理科值班员')}</div>
+            </div>
+          </div>`;
+      }).join('');
+    }
+
+    // ---- 分页信息 ----
+    if (total === 0) {
+      paginationInfo.innerHTML = '暂无记录';
+    } else {
+      const start = (currentPage - 1) * PAGE_SIZE + 1;
+      const end = Math.min(currentPage * PAGE_SIZE, total);
+      paginationInfo.innerHTML = `第 <strong>${currentPage}</strong> / <strong>${tp}</strong> 页 · 显示第 <strong>${start}–${end}</strong> 条，共 <strong>${total}</strong> 条`;
+    }
+
+    // ---- 分页按钮 ----
+    paginationControls.innerHTML = '';
+    if (total > PAGE_SIZE) {
+      const prevBtn = document.createElement('button');
+      prevBtn.className = 'page-btn';
+      prevBtn.textContent = '‹';
+      prevBtn.disabled = currentPage <= 1;
+      prevBtn.addEventListener('click', () => { currentPage--; savePage(); render(); });
+      paginationControls.appendChild(prevBtn);
+
+      const maxButtons = 7;
+      let startPage = Math.max(1, currentPage - 3);
+      let endPage = Math.min(tp, startPage + maxButtons - 1);
+      if (endPage - startPage < maxButtons - 1) startPage = Math.max(1, endPage - maxButtons + 1);
+
+      if (startPage > 1) {
+        paginationControls.appendChild(makePageBtn(1));
+        if (startPage > 2) {
+          const ellipsis = document.createElement('span');
+          ellipsis.textContent = '…';
+          ellipsis.style.cssText = 'padding: 0 4px; color: #8ba3b8;';
+          paginationControls.appendChild(ellipsis);
         }
-        
-        // 初始化日期时间并每秒更新
-        updateDateTime();
-        setInterval(updateDateTime, 1000);
-        
-        // 为所有删除按钮添加事件
-        document.querySelectorAll('.delete-btn').forEach(button => {
-            button.addEventListener('click', function() {
-                this.closest('.reminder-item').remove();
-                updateReminderCount();
-            });
-        });
-        
-        // 添加新提醒
-        document.getElementById('addReminder').addEventListener('click', function() {
-            const title = document.getElementById('reminderTitle').value;
-            const content = document.getElementById('reminderContent').value;
-            const date = document.getElementById('reminderDate').value;
-            const priority = document.getElementById('reminderPriority').value;
-            const department = document.getElementById('reminderDepartment').value;
-            
-            if (!title || !content) {
-                alert('请填写任务标题和内容！');
-                return;
-            }
-            
-            const formattedDate = formatDateInput(date);
-            
-            const priorityClassMap = {
-                'high': '高优先级',
-                'medium': '中优先级',
-                'low': '低优先级'
-            };
-            
-            const priorityClass = priority + '-priority';
-            const priorityText = priorityClassMap[priority];
-            
-            const reminderItem = document.createElement('div');
-            reminderItem.className = `reminder-item ${priorityClass}`;
-            reminderItem.innerHTML = `
-                <h3 class="reminder-title">
-                    <i class="fas ${getPriorityIcon(priority)}"></i> 
-                    ${title}
-                    <span class="priority-tag">${priorityText}</span>
-                </h3>
-                <div class="reminder-content">${content}</div>
-                <div class="reminder-details">
-                    <div><i class="fas fa-calendar-day"></i> 截止日期: ${formattedDate || '未指定'}</div>
-                    <div><i class="fas fa-user-tag"></i> 部门: ${department}</div>
-                    <div><i class="fas fa-user"></i> 创建人: 您的姓名</div>
-                </div>
-                <button class="delete-btn"><i class="fas fa-trash-alt"></i></button>
-            `;
-            
-            document.getElementById('remindersContainer').prepend(reminderItem);
-            
-            // 为新添加的提醒添加删除事件
-            reminderItem.querySelector('.delete-btn').addEventListener('click', function() {
-                reminderItem.remove();
-                updateReminderCount();
-            });
-            
-            // 清空表单
-            document.getElementById('reminderTitle').value = '';
-            document.getElementById('reminderContent').value = '';
-            document.getElementById('reminderDate').value = '';
-            document.getElementById('reminderPriority').value = 'medium';
-            
-            updateReminderCount();
-        });
-        
-        function getPriorityIcon(priority) {
-            switch(priority) {
-                case 'high': return 'fa-exclamation-circle';
-                case 'medium': return 'fa-chart-line';
-                case 'low': return 'fa-users';
-                default: return 'fa-tasks';
-            }
+      }
+
+      for (let i = startPage; i <= endPage; i++) {
+        paginationControls.appendChild(makePageBtn(i));
+      }
+
+      if (endPage < tp) {
+        if (endPage < tp - 1) {
+          const ellipsis = document.createElement('span');
+          ellipsis.textContent = '…';
+          ellipsis.style.cssText = 'padding: 0 4px; color: #8ba3b8;';
+          paginationControls.appendChild(ellipsis);
         }
-        
-        function formatDateInput(dateStr) {
-            if (!dateStr) return '';
-            
-            const date = new Date(dateStr);
-            const options = { year: 'numeric', month: 'long', day: 'numeric' };
-            return date.toLocaleDateString('zh-CN', options);
+        paginationControls.appendChild(makePageBtn(tp));
+      }
+
+      const nextBtn = document.createElement('button');
+      nextBtn.className = 'page-btn';
+      nextBtn.textContent = '›';
+      nextBtn.disabled = currentPage >= tp;
+      nextBtn.addEventListener('click', () => { currentPage++; savePage(); render(); });
+      paginationControls.appendChild(nextBtn);
+    }
+
+    // ---- 统计 ----
+    statTotal.textContent = total;
+    statHigh.textContent = reminders.filter(r => r.priority === 'high').length;
+    statOverdue.textContent = reminders.filter(r => isOverdue(r)).length;
+    statHandlers.textContent = new Set(reminders.map(r => r.handler).filter(Boolean)).size;
+
+    // ---- 自检 ----
+    runAudit();
+  }
+
+  function makePageBtn(pageNum) {
+    const btn = document.createElement('button');
+    btn.className = 'page-btn' + (pageNum === currentPage ? ' active' : '');
+    btn.textContent = pageNum;
+    btn.addEventListener('click', () => { currentPage = pageNum; savePage(); render(); });
+    return btn;
+  }
+
+  // ============================================================
+  // 删除
+  // ============================================================
+  function deleteReminder(id) {
+    reminders = reminders.filter(r => r.id !== id);
+    clampPage();
+    saveData();
+    savePage();
+    render();
+  }
+
+  // 事件委托处理删除
+  container.addEventListener('click', function (e) {
+    const btn = e.target.closest('[data-delete]');
+    if (!btn) return;
+    const id = btn.getAttribute('data-delete');
+    if (id) deleteReminder(id);
+  });
+
+  // ============================================================
+  // 添加
+  // ============================================================
+  form.addEventListener('submit', function (e) {
+    e.preventDefault();
+
+    const title = titleInput.value.trim();
+    const content = contentInput.value.trim();
+    const handler = handlerInput.value.trim();
+
+    if (!title || !content || !handler) {
+      alert('请填写标题、内容和办事人。');
+      return;
+    }
+
+    const reminder = {
+      id: uid(),
+      title: title,
+      content: content,
+      priority: prioritySelect.value,
+      deadline: deadlineInput.value || '',
+      handler: handler,
+      creator: creatorInput.value.trim() || '管理科值班员',
+      createdAt: new Date().toISOString()
+    };
+
+    reminders.unshift(reminder);
+
+    // 记录办事人历史
+    if (!handlerHistory.includes(handler)) {
+      handlerHistory.push(handler);
+      saveHandlers();
+      renderHandlerDatalist();
+    }
+
+    // 新条目加到第一页
+    currentPage = 1;
+
+    saveData();
+    savePage();
+    render();
+
+    // 重置表单
+    form.reset();
+    prioritySelect.value = 'medium';
+    titleInput.focus();
+  });
+
+  // ============================================================
+  // 自检面板
+  // ============================================================
+  function runAudit() {
+    const rawData = localStorage.getItem(STORAGE_KEY_DATA);
+    const rawPage = localStorage.getItem(STORAGE_KEY_PAGE);
+    const auditData = document.getElementById('auditData');
+    const auditPage = document.getElementById('auditPage');
+    const auditConsistent = document.getElementById('auditConsistent');
+
+    // 1. 数据存在
+    if (rawData !== null) {
+      auditData.innerHTML = '<span class="audit-pass">✓ 已存储</span>';
+    } else {
+      auditData.innerHTML = '<span class="audit-fail">✗ 无数据</span>';
+    }
+
+    // 2. 页码存在
+    if (rawPage !== null) {
+      auditPage.innerHTML = `<span class="audit-pass">✓ 第 ${rawPage} 页</span>`;
+    } else {
+      auditPage.innerHTML = '<span class="audit-fail">✗ 未存储</span>';
+    }
+
+    // 3. 一致性：存储中的条数与内存一致
+    if (rawData !== null) {
+      try {
+        const stored = JSON.parse(rawData);
+        if (Array.isArray(stored) && stored.length === reminders.length) {
+          auditConsistent.innerHTML = `<span class="audit-pass">✓ 一致（${stored.length} 条）</span>`;
+        } else {
+          auditConsistent.innerHTML = '<span class="audit-fail">✗ 条数不一致</span>';
         }
-        
-        function updateReminderCount() {
-            const count = document.querySelectorAll('.reminder-item').length;
-            document.getElementById('reminderCount').textContent = `共${count}项任务`;
+      } catch (e) {
+        auditConsistent.innerHTML = '<span class="audit-fail">✗ 解析异常</span>';
+      }
+    } else {
+      auditConsistent.innerHTML = reminders.length === 0
+        ? '<span class="audit-pass">✓ 空列表一致</span>'
+        : '<span class="audit-fail">✗ 内存有数据但未存储</span>';
+    }
+  }
+
+  // ============================================================
+  // 时间显示
+  // ============================================================
+  function updateClock() {
+    const now = new Date();
+    const y = now.getFullYear();
+    const m = String(now.getMonth() + 1).padStart(2, '0');
+    const d = String(now.getDate()).padStart(2, '0');
+    const week = ['日', '一', '二', '三', '四', '五', '六'][now.getDay()];
+    const hh = String(now.getHours()).padStart(2, '0');
+    const mm = String(now.getMinutes()).padStart(2, '0');
+    const ss = String(now.getSeconds()).padStart(2, '0');
+    document.getElementById('currentDateTime').textContent =
+      `${y}年${m}月${d}日 星期${week} ${hh}:${mm}:${ss}`;
+  }
+
+  // ============================================================
+  // 初始化
+  // ============================================================
+  function init() {
+    loadFromStorage();
+
+    // 如果完全没有数据，写入几条贴合管理科业务的示例提醒
+    if (reminders.length === 0 && localStorage.getItem(STORAGE_KEY_DATA) === null) {
+      reminders = [
+        {
+          id: uid(),
+          title: '建华道与友谊路口井盖沉降隐患处置',
+          content: '巡查发现建华道与友谊路交叉口东北角一处雨污水井盖周边路面沉降约 5cm，存在安全隐患。请办事人今日下班前现场核实并设置警示围挡，联系维护班组尽快修复。',
+          priority: 'high',
+          deadline: todayStr(),
+          handler: '张建军',
+          creator: '管理科值班员',
+          createdAt: new Date().toISOString()
+        },
+        {
+          id: uid(),
+          title: '学院路（长宁道—朝阳道）人行道板砖松动专项巡查',
+          content: '接市民热线反映学院路部分人行道板砖松动、雨天溅水。请办事人带队对该路段全线排查，建立问题台账，能现场处置的立即处置，不能即时修复的列入本周维修计划。',
+          priority: 'medium',
+          deadline: todayStr(),
+          handler: '李卫东',
+          creator: '管理科值班员',
+          createdAt: new Date().toISOString()
+        },
+        {
+          id: uid(),
+          title: '数字化督办案件（编号 2026-LB-0312）销号材料报送',
+          content: '区数字化城管指挥中心督办案件：北新道某处路缘石缺失。现场已修复完毕，请办事人今日 17:00 前整理修复前后对比照片及销号说明，报送指挥中心闭环。',
+          priority: 'high',
+          deadline: todayStr(),
+          handler: '王海涛',
+          creator: '管理科值班员',
+          createdAt: new Date().toISOString()
+        },
+        {
+          id: uid(),
+          title: '汛期前排水设施清掏进度跟踪',
+          content: '按照市政所汛前准备工作部署，对管理科管辖范围内主次干道雨水篦子、检查井清掏进度进行跟踪统计。请办事人本周五前汇总已完成数量及未完成点位清单。',
+          priority: 'medium',
+          deadline: todayStr(),
+          handler: '刘志刚',
+          creator: '管理科值班员',
+          createdAt: new Date().toISOString()
         }
-        
-        // 初始化页面
-        updateReminderCount();
-    </script>
+      ];
+      saveData();
+      currentPage = 1;
+      savePage();
+    }
+
+    render();
+    updateClock();
+    setInterval(updateClock, 1000);
+  }
+
+  init();
+})();
+</script>
 </body>
 </html>
